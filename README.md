@@ -7,7 +7,7 @@ All spring's `query` and `queryForList` methods which return `java.util.List`'s 
 
 In runtime library has no additional dependencies (except spring-jdbc itself and it's own dependencies).
 
-Library is available in [Maven cental](http://repo1.maven.org/maven2/com/alexkasko/springjdbc/).
+Library is available in [Maven central](http://repo1.maven.org/maven2/com/alexkasko/springjdbc/).
 
 Javadocs for the latest release are available [here](http://alexkasko.github.com/springjdbc-iterable/javadocs).
 

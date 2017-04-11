@@ -1,17 +1,14 @@
-package com.alexkasko.springjdbc.iterable;
+package org.springjdbc.iterable;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.jdbc.InvalidResultSetAccessException;
-import org.springframework.jdbc.core.*;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.JdbcUtils;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -24,14 +21,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author alexkasko
  * Date: 11/7/12
  */
-class PreparedStatementCloseableIterator<T> implements CloseableIterator<T> {
-    private static final Log logger = LogFactory.getLog(PreparedStatementCloseableIterator.class);
+class StatementCloseableIterator<T> implements CloseableIterator<T> {
+    private static final Log logger = LogFactory.getLog(StatementCloseableIterator.class);
 
     private final DataSource ds;
     private final Connection conn;
-    private final PreparedStatementCreator psc;
-    private final PreparedStatementSetter pss;
-    private final PreparedStatement ps;
+    private final Statement stmt;
     private final ResultSet wrappedRs;
     private final ResultSet rsToUse;
     private final RowMapper<T> mapper;
@@ -48,20 +43,15 @@ class PreparedStatementCloseableIterator<T> implements CloseableIterator<T> {
      *
      * @param ds provided here for proper JDBC resources releasing
      * @param conn provided here for proper JDBC resources releasing
-     * @param psc provided here for proper JDBC resources releasing
-     * @param ps provided here for proper JDBC resources releasing
+     * @param stmt provided here for proper JDBC resources releasing
      * @param wrappedRs provided here for proper JDBC resources releasing
      * @param rsToUse result set to iterate over
      * @param mapper row mapper to use
      */
-    PreparedStatementCloseableIterator(DataSource ds, Connection conn, PreparedStatementCreator psc,
-                                       PreparedStatementSetter pss, PreparedStatement ps,
-                                       ResultSet wrappedRs, ResultSet rsToUse, RowMapper<T> mapper) {
+    StatementCloseableIterator(DataSource ds, Connection conn, Statement stmt, ResultSet wrappedRs, ResultSet rsToUse, RowMapper<T> mapper) {
         this.ds = ds;
         this.conn = conn;
-        this.psc = psc;
-        this.pss = pss;
-        this.ps = ps;
+        this.stmt = stmt;
         this.wrappedRs = wrappedRs;
         this.rsToUse = rsToUse;
         this.mapper = mapper;
@@ -105,19 +95,12 @@ class PreparedStatementCloseableIterator<T> implements CloseableIterator<T> {
      * Releases JDBC resources exactly the same way {@code JdbcTemplate} does.
      * See finally clause {@code JdbcTemplate#query(org.springframework.jdbc.core.PreparedStatementCreator, org.springframework.jdbc.core.PreparedStatementSetter, org.springframework.jdbc.core.ResultSetExtractor)}
      * See finally clause {@code JdbcTemplate#execute(org.springframework.jdbc.core.PreparedStatementCreator, org.springframework.jdbc.core.PreparedStatementCallback)}
-     * See finally clause {@code JdbcTemplate#query(org.springframework.jdbc.core.PreparedStatementCreator, org.springframework.jdbc.core.PreparedStatementSetter, org.springframework.jdbc.core.ResultSetExtractor)}
      */
     @Override
     public void close() {
         if(!closed.compareAndSet(false, true)) return;
         JdbcUtils.closeResultSet(wrappedRs);
-        if(pss instanceof ParameterDisposer) {
-            ((ParameterDisposer) pss).cleanupParameters();
-        }
-        if(psc instanceof ParameterDisposer) {
-            ((ParameterDisposer) psc).cleanupParameters();
-        }
-        JdbcUtils.closeStatement(ps);
+        JdbcUtils.closeStatement(stmt);
         DataSourceUtils.releaseConnection(conn, ds);
     }
 
@@ -144,11 +127,10 @@ class PreparedStatementCloseableIterator<T> implements CloseableIterator<T> {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
-        sb.append("PreparedStatementCloseableIterator");
+        sb.append("ResultSetCloseableIterator");
         sb.append("{ds=").append(ds);
         sb.append(", conn=").append(conn);
-        sb.append(", psc=").append(psc);
-        sb.append(", ps=").append(ps);
+        sb.append(", stmt=").append(stmt);
         sb.append(", wrappedRs=").append(wrappedRs);
         sb.append(", rsToUse=").append(rsToUse);
         sb.append(", mapper=").append(mapper);
@@ -162,7 +144,7 @@ class PreparedStatementCloseableIterator<T> implements CloseableIterator<T> {
      *  Wrapper method for exceptions catching
      *
      * @return next iter value or {@code endOfData()}
-     * @throws InvalidResultSetAccessException on result set access problem
+     * @throws org.springframework.jdbc.InvalidResultSetAccessException on result set access problem
      */
     private T computeNext() {
         try {
@@ -176,7 +158,7 @@ class PreparedStatementCloseableIterator<T> implements CloseableIterator<T> {
      * Iterator logic is here. Closes iterator on exhausted result set
      *
      * @return next iter value or {@code endOfData()}
-     * @throws SQLException on result set access problem
+     * @throws java.sql.SQLException on result set access problem
      */
     private T computeNextInternal() throws SQLException {
         if(closed.get()) return endOfData();

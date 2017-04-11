@@ -1,4 +1,4 @@
-package com.alexkasko.springjdbc.iterable;
+package org.springjdbc.iterable;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,25 +41,6 @@ public class IterableJdbcTemplate extends JdbcTemplate implements IterableJdbcOp
     public IterableJdbcTemplate(DataSource dataSource, int fetchSize) {
         this(dataSource);
         setFetchSize(fetchSize);
-    }
-
-    /**
-     * Static method to use in finally methods for closing
-     * {@link CloseableIterator}s. Writes warning into log on exception.
-     * Since 1.2 <a href="http://commons.apache.org/proper/commons-io//javadocs/api-2.4/org/apache/commons/io/IOUtils.html#closeQuietly%28java.io.Closeable%29">IOUtils.closeQuietly()</a>
-     * may be used instead this one.
-     *
-     * @param iter iterator to close
-     */
-    @Deprecated // use IOUtils.closeQuietly() instead
-    public static void closeQuetly(CloseableIterator<?> iter) {
-        try {
-            if (iter != null) {
-                iter.close();
-            }
-        } catch (Exception e) {
-            logger.warn("Error on closing iterator: [" + iter + "]", e);
-        }
     }
 
     /**

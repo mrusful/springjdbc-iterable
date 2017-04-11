@@ -1,4 +1,4 @@
-package com.alexkasko.springjdbc.iterable;
+package org.springjdbc.iterable;
 
 import org.junit.Test;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;

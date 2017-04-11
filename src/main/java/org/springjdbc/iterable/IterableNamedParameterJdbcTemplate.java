@@ -1,4 +1,4 @@
-package com.alexkasko.springjdbc.iterable;
+package org.springjdbc.iterable;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ColumnMapRowMapper;

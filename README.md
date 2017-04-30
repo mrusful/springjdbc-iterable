@@ -7,10 +7,6 @@ All spring's `query` and `queryForList` methods which return `java.util.List`'s 
 
 In runtime library has no additional dependencies (except spring-jdbc itself and it's own dependencies).
 
-Library is available in [Maven central](http://repo1.maven.org/maven2/com/alexkasko/springjdbc/).
-
-Javadocs for the latest release are available [here](http://alexkasko.github.com/springjdbc-iterable/javadocs).
-
 JdbcTemplate problem
 --------------------
 
@@ -49,8 +45,7 @@ All iterators are connected to DB through open result sets and load data from DB
 (more precisely, some JDBC drivers tend to load all result set into memory at once on default settings,
 but usually you can control this using `jt.setFetchSize`).
 
-`CloseableIterator` is an `java.util.Iterator` (so you may use [guava](http://docs.guava-libraries.googlecode.com/git/javadoc/com/google/common/collect/Iterators.html)
- methods on it), with `close()` method that must be called after using to release JDBC resources.
+`CloseableIterator` is an `java.util.Iterator` with `close()` method that must be called after using to release JDBC resources.
 These iterators are closed automatically on result set exhaustion. But even if you real iterators fully,
 you should always call `close()` in `finally` block for the case of exception throwing when iterator is still open.
 
@@ -59,14 +54,6 @@ be valid only within transaction bounds. So such iterators must be opened, used 
 
 Library usage
 -------------
-
-Maven dependency (available in central repository):
-
-    <dependency>
-        <groupId>com.alexkasko.springjdbc</groupId>
-        <artifactId>springjdbc-iterable</artifactId>
-        <version>1.0.3</version>
-    </dependency>
 
 `IterableJdbcTemplate` extends standard `JdbcTemplate` providing additional method `queryForIter(...)`
 with many overloaded variants, covering all `queryForList(...)` and `query(...)` methods of `JdbcTemplate` that return `List`'s.
